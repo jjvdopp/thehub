@@ -1,1 +1,456 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NTFY Test Panel · The Hub</title>
 
+<style>
+:root{
+  --bg:#0b0d10;
+  --panel:#14171b;
+  --panel2:#1b1f24;
+  --line:#2a3037;
+  --text:#f1f3f5;
+  --muted:#9299a2;
+  --accent:#72b957;
+  --danger:#d95c5c;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(
+    circle at 50% 0,
+    #20252b 0,
+    #0b0d10 48%
+  );
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+}
+
+.wrap{
+  width:min(560px,100%);
+}
+
+.brand{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.logo{
+  font-size:30px;
+  font-weight:800;
+  letter-spacing:-1px;
+}
+
+.sub{
+  color:var(--muted);
+  margin-top:5px;
+}
+
+.card{
+  background:rgba(20,23,27,.96);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 18px 50px #0008;
+}
+
+.status{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:11px 13px;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:10px;
+  margin-bottom:18px;
+  font-size:13px;
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 10px #72b95788;
+}
+
+.dot.err{
+  background:var(--danger);
+  box-shadow:0 0 10px #d95c5c88;
+}
+
+label{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+  margin:14px 0 6px;
+}
+
+input,
+textarea,
+select{
+  width:100%;
+  border:1px solid var(--line);
+  background:#0e1114;
+  color:var(--text);
+  border-radius:9px;
+  padding:11px 12px;
+  font:inherit;
+  outline:none;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:#5b6772;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 150px;
+  gap:10px;
+}
+
+button{
+  width:100%;
+  border:0;
+  border-radius:10px;
+  padding:12px 14px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.send{
+  margin-top:17px;
+  background:var(--accent);
+  color:#0a1008;
+}
+
+.send:disabled{
+  opacity:.55;
+  cursor:wait;
+}
+
+.quick{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:10px;
+}
+
+.quick button{
+  background:#242a30;
+  color:var(--text);
+  border:1px solid var(--line);
+}
+
+.result{
+  margin-top:15px;
+  padding:12px;
+  border-radius:9px;
+  background:#0e1114;
+  border:1px solid var(--line);
+  font-size:13px;
+  display:none;
+  white-space:pre-wrap;
+}
+
+.result.ok{
+  display:block;
+  border-color:#426c36;
+}
+
+.result.err{
+  display:block;
+  border-color:#743b3b;
+}
+
+.small{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.5;
+  margin-top:14px;
+}
+
+@media(max-width:480px){
+  .row{
+    grid-template-columns:1fr;
+  }
+
+  .quick{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <div class="brand">
+    <div class="logo">NTFY TEST PANEL</div>
+    <div class="sub">The Hub · laboratorio temporal</div>
+  </div>
+
+  <div class="card">
+
+    <div class="status">
+      <span class="dot" id="dot"></span>
+      <span id="status">Panel listo · ntfy.sh</span>
+    </div>
+
+    <div class="row">
+
+      <div>
+        <label for="topic">Topic</label>
+
+        <input
+          id="topic"
+          value="thehub-test-8f4c2a91"
+          autocomplete="off"
+        >
+      </div>
+
+      <div>
+        <label for="priority">Prioridad</label>
+
+        <select id="priority">
+          <option value="1">Mínima</option>
+          <option value="2">Baja</option>
+          <option value="3" selected>Normal</option>
+          <option value="4">Alta</option>
+          <option value="5">Máxima</option>
+        </select>
+      </div>
+
+    </div>
+
+    <label for="title">Título</label>
+
+    <input
+      id="title"
+      value="The Hub · Prueba ntfy"
+    >
+
+    <label for="message">Mensaje</label>
+
+    <textarea id="message">¡Funciona! Esta notificación viene de la web de pruebas de The Hub. 🔔</textarea>
+
+    <button
+      class="send"
+      id="send"
+      onclick="sendNotification()"
+    >
+      🔔 Enviar notificación
+    </button>
+
+    <div class="quick">
+
+      <button
+        onclick="quick(
+          '🟢 Test OK',
+          'ntfy está funcionando correctamente.'
+        )"
+      >
+        🟢 Test OK
+      </button>
+
+      <button
+        onclick="quick(
+          '🚨 Test urgente',
+          'Prueba de prioridad máxima.',
+          5
+        )"
+      >
+        🚨 Urgente
+      </button>
+
+    </div>
+
+    <div
+      class="result"
+      id="result"
+    ></div>
+
+    <div class="small">
+      Laboratorio temporal. Usa un topic de pruebas sin datos sensibles.
+      Los topics públicos de ntfy no son privados: cualquiera que conozca
+      el topic puede publicar o suscribirse.
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const SERVER = "https://ntfy.sh";
+
+
+function setResult(text, ok){
+
+  const result = document.getElementById("result");
+  const dot = document.getElementById("dot");
+  const status = document.getElementById("status");
+
+  result.textContent = text;
+
+  result.className =
+    "result " + (ok ? "ok" : "err");
+
+  dot.className =
+    "dot" + (ok ? "" : " err");
+
+  status.textContent =
+    ok
+      ? "Último envío correcto"
+      : "Error al enviar";
+}
+
+
+function quick(title, message, priority = 3){
+
+  document.getElementById("title").value = title;
+
+  document.getElementById("message").value = message;
+
+  document.getElementById("priority").value = priority;
+
+  sendNotification();
+}
+
+
+async function sendNotification(){
+
+  const button =
+    document.getElementById("send");
+
+  const topic =
+    document.getElementById("topic").value.trim();
+
+  const title =
+    document.getElementById("title").value.trim();
+
+  const message =
+    document.getElementById("message").value.trim();
+
+  const priority =
+    Number(
+      document.getElementById("priority").value
+    );
+
+
+  if(!topic){
+
+    setResult(
+      "Falta el topic.",
+      false
+    );
+
+    return;
+  }
+
+
+  if(!message){
+
+    setResult(
+      "Falta el mensaje.",
+      false
+    );
+
+    return;
+  }
+
+
+  button.disabled = true;
+
+  button.textContent =
+    "Enviando…";
+
+
+  try{
+
+    const response = await fetch(
+
+      `${SERVER}/${encodeURIComponent(topic)}`,
+
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+          topic:topic,
+
+          title:title,
+
+          message:message,
+
+          priority:priority
+
+        })
+      }
+
+    );
+
+
+    if(!response.ok){
+
+      const errorText =
+        await response.text();
+
+      throw new Error(
+        `HTTP ${response.status}: ${errorText}`
+      );
+    }
+
+
+    setResult(
+      "✓ ¡Notificación enviada correctamente!\n\nComprueba ahora tu móvil.",
+      true
+    );
+
+
+  }catch(error){
+
+    setResult(
+      "No se pudo enviar:\n\n" +
+      error.message,
+      false
+    );
+
+  }finally{
+
+    button.disabled = false;
+
+    button.textContent =
+      "🔔 Enviar notificación";
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>
